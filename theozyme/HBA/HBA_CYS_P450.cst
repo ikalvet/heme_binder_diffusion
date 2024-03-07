@@ -1,0 +1,30 @@
+# cst constraint descriptor for ferryl intermediate C-H abstraction TS from nitroanisole
+# CYS coordinating to the Heme Fe based on cytochrome P450 (6fyj) geometry
+# I. Kalvet, Baker lab, UW,   ikalvet@uw.edu
+
+
+#block 1 for CYS coordinated to Fe
+
+CST::BEGIN
+
+  TEMPLATE::   ATOM_MAP: 1 atom_name: FE1 N4 C19
+  TEMPLATE::   ATOM_MAP: 1 residue3:  HBA
+
+  TEMPLATE::   ATOM_MAP: 2 atom_type: SH1
+  TEMPLATE::   ATOM_MAP: 2 residue3: CYS
+
+  CONSTRAINT:: distanceAB:    2.5   0.15  100.   1   1
+  CONSTRAINT::    angle_A:   85.9   5.0  100.0  360. 1
+  CONSTRAINT::    angle_B:  111.0   5.0   75.0  360. 1
+  CONSTRAINT::  torsion_A:   84.5   5.0   75.0  360. 1
+  CONSTRAINT:: torsion_AB:  108.0  15.0    0.0   90. 4
+  CONSTRAINT::  torsion_B:   82.4  20.0   25.0  360. 4
+
+  ALGORITHM_INFO:: match
+     MAX_DUNBRACK_ENERGY 5.0
+     IGNORE_UPSTREAM_PROTON_CHI
+  ALGORITHM_INFO::END
+
+CST::END
+
+

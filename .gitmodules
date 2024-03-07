@@ -1,0 +1,6 @@
+[submodule "lib/LigandMPNN"]
+	path = lib/LigandMPNN
+	url = git@github.com:ikalvet/LigandMPNN.git
+[submodule "lib/alphafold"]
+	path = lib/alphafold
+	url = git@github.com:google-deepmind/alphafold.git
