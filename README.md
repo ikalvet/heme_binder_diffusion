@@ -1,5 +1,5 @@
 # De novo heme binding protein design pipeline using RFdiffusionAA
-![image](https://github.com/ikalvet/heme_binder_diffusion/assets/30599647/3896b6ca-ffdb-4158-a2eb-2d0a600ec19f)
+![image](https://github.com/ikalvet/heme_binder_diffusion/assets/30599647/6aa36676-9cba-4a9d-940c-a313920935f3)
 #### And other ligand binders too, I guess
 Indrek Kalvet, PhD (Institute for Protein Design, University of Washington), ikalvet@uw.edu
 
