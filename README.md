@@ -51,7 +51,6 @@ Inpainting is used to further resample/diversify diffusion outputs, and it may a
 This pipeline consists of multiple different Python scripts using a multitude of different Python modules - most notably PyTorch, PyRosetta, Jax, Jaxlib, Tensorflow, Prody, OpenBabel. While it may be possible to set up a Python installation or a conda environment that includes all of these modules, it may be quite finicky.<br>
 Separate conda environments for AlphaFold2 and RFdiffusionAA/ligandMPNN were used to test this pipeline.
 
-Furthermore, PyRosetta is required to fully replicate this entire pipeline and use many of the utility scripts. PyRosetta can be downloaded after obtaining the license at: https://www.pyrosetta.org/downloads
 
 To create a conda environment capable of running RFdiffusionAA and LigandMPNN, set it up as follows:
 ```
@@ -61,7 +60,10 @@ conda install -c conda-forge omegaconf hydra-core=1.3.2 scipy icecream openbabel
 conda install dglteam/label/cu118::dgl
 conda install pytorch::torchdata
 ```
-
+Update as of 08.03.2024: PyRosetta is now freely available to download. You can add it to the above conda environment by running this command:<br>
+`pip install pyrosetta_installer && python -c 'import pyrosetta_installer; pyrosetta_installer.install_pyrosetta()'`
+<br>
+<br>
 Packages for a minimal conda environment for AlphaFold2:
 ```
 conda create -n "mlfold" python=3.10
