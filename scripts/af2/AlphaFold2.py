@@ -33,7 +33,7 @@ def predict_sequences(sequences, models, nrecycles, scorefile=None, random_seed=
 
         model_config.model.num_recycle = nrecycles
         model_config.data.common.num_recycle = nrecycles
-    
+
         model_config.data.common.max_extra_msa = 1
         model_config.data.eval.max_msa_clusters = 1
 

@@ -20,11 +20,9 @@ import setup_fixed_positions_around_target
 
 # MPNN scripts
 SCRIPT_PATH = os.path.dirname(__file__)
-# sys.path.append(f"{SCRIPT_PATH}/../ligandMPNN")
-sys.path.append("/home/ikalvet/git/LigandMPNN")
+sys.path.append(f"{SCRIPT_PATH}/../../lib/ligandMPNN")
 import mpnn_api
 from mpnn_api import MPNNRunner
-# from pyrosetta_tools import parser_tools
 
 # Utility scripts
 sys.path.append(f"{SCRIPT_PATH}/../utils")

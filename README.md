@@ -48,29 +48,20 @@ Make sure to provide a full path to the checkpoint file in this configuration fi
 Inpainting is used to further resample/diversify diffusion outputs, and it may also increase AF2 success rates.
 
 ### Python or Apptainer image
-This pipeline consists of multiple different Python scripts using a multitude of different Python modules - most notably PyTorch, PyRosetta, Jax, Jaxlib, Tensorflow, Prody, OpenBabel. While it may be possible to set up a Python installation or a conda environment that includes all of these modules, it may be quite finicky.<br>
-Separate conda environments for AlphaFold2 and RFdiffusionAA/ligandMPNN were used to test this pipeline.
+This pipeline consists of multiple different Python scripts using a different Python modules - most notably PyTorch, PyRosetta, Jax, Jaxlib, Tensorflow, Prody, OpenBabel.<br>
+Separate conda environments for AlphaFold2 and RFdiffusionAA/ligandMPNN were used to test this pipeline, and the environment YML files are provided in `envs/`.
 
 
-To create a conda environment capable of running RFdiffusionAA and LigandMPNN, set it up as follows:
-```
-conda create -n "diffusion" python=3.9
-conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
-conda install -c conda-forge omegaconf hydra-core=1.3.2 scipy icecream openbabel assertpy opt_einsum pandas pydantic deepdiff e3nn prody pyparsing=3.1.1
-conda install dglteam/label/cu118::dgl
-conda install pytorch::torchdata
-```
-Update as of 08.03.2024: PyRosetta is now freely available to download. You can add it to the above conda environment by running this command:<br>
-`pip install pyrosetta_installer && python -c 'import pyrosetta_installer; pyrosetta_installer.install_pyrosetta()'`
-<br>
-<br>
-Packages for a minimal conda environment for AlphaFold2:
-```
-conda create -n "mlfold" python=3.10
-conda install -c conda-forge numpy jax dm-tree dm-haiku tensorflow gcc scipy jaxlib[build=*cuda*]
-conda install -c conda-forge mock biopython=1.79 ml-collections
-```
-
-For iterative LigandMPNN and FastRelax, an environment with both `pytorch` and `pyrosetta` is required.
+To create a conda environment capable of running RFdiffusionAA, LigandMPNN and PyRosetta, set it up as follows:<br>
+`conda env create -f envs/diffusion.yml`
 
 
+A minimal conda environment for AlphaFold2 is set up as follows:<br>
+`conda env create -f envs/mlfold.yml`
+
+
+### Executing the pipeline
+Please adjust the the critical paths defined in the first couple of cells of the notebook based on your system configuration. Other than that, the pipeline is executed by running the cells and waiting for them to finish.
+
+Certain tasks are configured to run as Slurm jobs on a compute cluster. The Slurm script setup is handled in `scripts/utils/utils.py` by the function `create_slurm_submit_script()`.
+Please modify this script, and any references to it in the notebook, based on how your system accepts jobs.
