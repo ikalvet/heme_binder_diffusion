@@ -11,16 +11,14 @@ import argparse
 import json
 import glob
 import numpy as np
-import queue, threading
 import multiprocessing
 import pyrosetta as pyr
 import pyrosetta.rosetta
-from pssm_tools import make_bias_pssm
 
 SCRIPT_PATH = os.path.dirname(__file__)
-sys.path.append(f"{SCRIPT_PATH}/../../../../scripts")
+sys.path.append(f"{SCRIPT_PATH}/../utils")
 import design_utils
-
+from pssm_tools import make_bias_pssm
 
 
 ALPHABET = "ABCDEFGHIJKLMOPQRSTUVW"
@@ -93,6 +91,8 @@ def main(args):
     if args.ligand_bias_atoms is not None:
         ligand_polar_bias_atoms = args.ligand_bias_atoms
 
+    if args.bias_AAs is not None and ligand_polar_bias_atoms is None:
+        print("Will NOT generate an AA bias JSON file. Please provide target ligand atoms with --ligand_bias_atoms")
 
     extra_res_fa = ""
     if args.params is not None:
@@ -105,9 +105,6 @@ def main(args):
         rotamer_jsonl = open(args.rotamer_jsonl, "r").readlines()
         pass
 
-    masked_pos = {}
-    if ligand_polar_bias_atoms is not None:
-        pssm_dict_designs = {}
     the_queue = multiprocessing.Queue()  # Queue stores the iterables
 
     manager = multiprocessing.Manager()
@@ -126,7 +123,6 @@ def main(args):
             if pdbfile is None:
                 return
             pdbname = os.path.basename(pdbfile)
-            # global pose
 
             pose = pyr.pose_from_file(pdbfile)
 
@@ -275,7 +271,7 @@ if __name__ == "__main__":
     parser.add_argument("--ligand_bias_atoms", nargs="+", help="Ligand atom names that require polar contacts. Heavyatoms only.")
     parser.add_argument("--bias_AAs", type=str, default="GRKEDQNSTYWH", help="AA1 that the designs will be biased for. Default = GRKEDQNSTYWH")
     parser.add_argument("--bias_low", type=float, default=-1.0, help="Log_odd low limit for bias. default = -1.0")
-    parser.add_argument("--bias_high", type=float, default=1.39, help="Log_odd low limit for bias. default = 1.39")
+    parser.add_argument("--bias_high", type=float, default=1.39, help="Log_odd high limit for bias. default = 1.39")
     parser.add_argument("--rotamer_jsonl", type=str, help="JSONL file generate with parsed rotamers. Names in the JSONL must be <pdfile_r{n}>")
     parser.add_argument("--output_path", type=str, help="JSONL file generate with parsed rotamers. Names in the JSONL must be <pdfile_r{n}>")
     parser.add_argument("--omit", action="store_true", default=False, help="Should the bias AA's receive pssm bias or be omitted?")
