@@ -20,7 +20,7 @@ import setup_fixed_positions_around_target
 
 # MPNN scripts
 SCRIPT_PATH = os.path.dirname(__file__)
-sys.path.append(f"{SCRIPT_PATH}/../../lib/ligandMPNN")
+sys.path.append(f"{SCRIPT_PATH}/../../lib/LigandMPNN")
 import mpnn_api
 from mpnn_api import MPNNRunner
 

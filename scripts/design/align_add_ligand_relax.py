@@ -36,7 +36,7 @@ from pyrosetta.rosetta.core.select.residue_selector import AndResidueSelector
 
 
 SCRIPT_PATH = os.path.dirname(__file__)
-sys.path.append(f"{SCRIPT_PATH}/../../../scripts")
+sys.path.append(f"{SCRIPT_PATH}/../utils")
 import design_utils
 import no_ligand_repack
 import scoring_utils

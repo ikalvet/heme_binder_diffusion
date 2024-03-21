@@ -11,7 +11,7 @@ import os, sys
 import pandas as pd
 
 SCRIPT_PATH = os.path.dirname(__file__)
-sys.path.append(f"{SCRIPT_PATH}/../../../../scripts")
+sys.path.append(f"{SCRIPT_PATH}/../../utils")
 import no_ligand_repack
 import scoring_utils
 import design_utils
