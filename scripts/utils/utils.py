@@ -271,7 +271,7 @@ def create_slurm_submit_script(filename, partition=None, gpu=False, gres=None, t
 #SBATCH -e {outfile_name}.err
 '''
 
-    if gpu is True:
+    if gpu is True or gres is not None:
         submit_txt += f"""#SBATCH --gres={gres}\n"""
     
     if email is not None:
