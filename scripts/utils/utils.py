@@ -241,7 +241,7 @@ def dump_scorefile(df, filename):
             file.write(line + "\n")
 
 
-def create_slurm_submit_script(filename, gpu=False, gres=None, time=None, mem="2g", N_nodes=1, N_cores=1, name=None, array=None, array_commandfile=None, group=None, email=None, command=None, outfile_name="output"):
+def create_slurm_submit_script(filename, partition=None, gpu=False, gres=None, time=None, mem="2g", N_nodes=1, N_cores=1, name=None, array=None, array_commandfile=None, group=None, email=None, command=None, outfile_name="output"):
     """
     Arguments:
         time (str) :: time in 'D-HH:MM:SS'
@@ -249,12 +249,20 @@ def create_slurm_submit_script(filename, gpu=False, gres=None, time=None, mem="2
     
     if gpu is True:
         assert gres is not None, "Need to specify resources when asking for a GPU"
+
+    # Default partition, if none is provided
+    if partition is None:
+        if gpu is True:
+            partition = "gpu"
+        else:
+            partition = "cpu"
     
     cbo = "{"
     cbc = "}"
     submit_txt = \
     f'''#!/bin/bash
 #SBATCH --job-name={name}
+#SBATCH -p {partition}
 #SBATCH -t {time}
 #SBATCH -N {N_nodes}
 #SBATCH -n {N_cores}
@@ -262,11 +270,9 @@ def create_slurm_submit_script(filename, gpu=False, gres=None, time=None, mem="2
 #SBATCH -o {outfile_name}.log
 #SBATCH -e {outfile_name}.err
 '''
+
     if gpu is True:
-        submit_txt += f"""#SBATCH -p gpu
-#SBATCH --gres={gres}\n"""
-    else:
-        submit_txt += "#SBATCH -p cpu\n"
+        submit_txt += f"""#SBATCH --gres={gres}\n"""
     
     if email is not None:
         assert "@" in email, "invalid email address provided"
