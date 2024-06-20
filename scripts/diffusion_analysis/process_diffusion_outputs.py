@@ -838,7 +838,7 @@ def main():
         N_PROCESSES = args.nproc
         print(f"Using {N_PROCESSES} processes")
     else:
-        N_PROCESSES = args.nproc - 1
+        N_PROCESSES = args.nproc
         print(f"Using {N_PROCESSES} processes")
 
 
