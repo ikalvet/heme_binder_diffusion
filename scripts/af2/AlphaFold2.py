@@ -21,7 +21,7 @@ os.environ['TF_FORCE_UNIFIED_MEMORY'] = '1'
 os.environ['XLA_PYTHON_CLIENT_MEM_FRACTION'] = '2.0'
 
 
-def predict_sequences(sequences, models, nrecycles, scorefile=None, random_seed=None, nstruct=1, npy=False):
+def predict_sequences(sequences, models, nrecycles, scorefile=None, random_seed=None, nstruct=1):
     # setup which models to use
     # note for demo, we are only using model_4
     _models_start = timer()
@@ -37,21 +37,29 @@ def predict_sequences(sequences, models, nrecycles, scorefile=None, random_seed=
         model_config.data.common.max_extra_msa = 1
         model_config.data.eval.max_msa_clusters = 1
 
-        model_params = data.get_model_haiku_params(model_name=model_name, data_dir=f"{SCRIPT_DIR}/../../lib/alphafold/model_weights")
+        model_params = data.get_model_haiku_params(model_name=model_name, data_dir="/home/indrek/software/AlphaFold/alphafold")
         model_runner = model.RunModel(model_config, model_params)
         model_runners[model_name] = model_runner
     print(f"Setting up models took {(timer() - _models_start):.3f} seconds.")
 
     i = 0
     predictions = []
-    prefix = tempfile._get_default_tempdir() + '/' + next(tempfile._get_candidate_names())
-    print(prefix)
 
     _st = timer()
     for sequence in sequences:
         query_sequence = sequence[0]
         for n in range(nstruct):
-            pdb_file = f"{prefix}{i}_{n}"
+
+            # Checking if output already exists
+            predicted_runners = []
+            for mdl in model_runners:
+                fn = f"{sequence[1]}_{mdl}.{n}_r{nrecycles}_af2"
+                if os.path.exists(fn+".pdb"):
+                    predicted_runners.append(mdl)
+            if len(predicted_runners) == len(model_runners):
+                print(f"Already predicted: {fn}")
+                continue
+
             start = timer()
 
             # mock pipeline for single sequence prediction
@@ -74,9 +82,8 @@ def predict_sequences(sequences, models, nrecycles, scorefile=None, random_seed=
                 # print(f"Random seed = {random_seed}")
 
             results = predict_structure(
-                 pdb_file=pdb_file,
                  data_pipeline=data_pipeline_mock,
-                 model_runners=model_runners,
+                 model_runners={k:v for k,v in model_runners.items() if k not in predicted_runners},
                  random_seed=random_seed
             )
 
@@ -91,23 +98,22 @@ def predict_sequences(sequences, models, nrecycles, scorefile=None, random_seed=
                         'description': sequence[1],
                         'nrecycles': nrecycles,
                         'lddt': lddt,
-                        # 'pdb_file': result['pdb_file'],
-                        # 'npy_file': result['npy_file'],
                         'time': time}
 
                 predictions.append(pred)
                 
                 # Dump PDB file
-                fn = f"{sequence[1]}_{result['model']}.{n}_r{nrecycles}_af2"
-                _pdbf = open(result['pdb_file'], "rb").read()
-                with open(f"{fn}.pdb", "wb") as file:
-                    file.write(_pdbf)
-
-                if npy is True:
-                    # Dumping the NPZ file
-                    _npy = open(result['npy_file'], "rb").read()
-                    with open(f"{fn}.npz", "wb") as file:
-                        file.write(_npy)
+                # First add lDDTs as B-factors to the PDB
+                pdblist = result["pdb_content"].split("\n")
+                for j,l in enumerate(pdblist):
+                    if l[:4] != "ATOM":
+                        continue
+                    resno = int(l[22:26].strip())
+                    bfac = result['lddts'][resno-1]
+                    pdblist[j] = l[:61]+f"{bfac:>5.2f}"+l[66:]
+                with open(f"{fn}.pdb", "w") as file:
+                    for l in pdblist:
+                        file.write(l+"\n")
 
 
                 # Add line to scorefile
@@ -122,7 +128,7 @@ def predict_sequences(sequences, models, nrecycles, scorefile=None, random_seed=
                                 pred['lddt'],
                                 pred['time']
                                 ))
-            print("Sequence %d completed in %.1f sec with %d models; lDDT=%.3f" % (i, time, len(results), lddt))
+            print(f"Sequence {i}/{len(sequences)} completed in {time:.1f} sec with {len(results)} models; lDDT={lddt:.3f}")
         i += 1
 
     print(f"Done with {i} sequences. {(timer() - _st):.3f} sec.")
@@ -158,7 +164,6 @@ def mk_mock_template(query_sequence):
 
 
 def predict_structure(
-    pdb_file: str,
     data_pipeline: pipeline.DataPipeline,
     model_runners: Dict[str, model.RunModel],
     random_seed: int):
@@ -176,14 +181,14 @@ def predict_structure(
       prediction_result = model_runner.predict(processed_feature_dict, random_seed=random_seed)
       unrelaxed_protein = protein.from_prediction(processed_feature_dict,prediction_result)
 
-      model_pdb_file = pdb_file + '_' + model_name
-      with open(model_pdb_file, 'w') as f:
-          f.write(protein.to_pdb(unrelaxed_protein))
+      # model_pdb_file = pdb_file + '_' + model_name
+      # with open(model_pdb_file, 'w') as f:
+      #     f.write(protein.to_pdb(unrelaxed_protein))
 
-      model_npy_file = model_pdb_file + '.npy'
-      np.save(model_npy_file, prediction_result['plddt'])
+      # model_npy_file = model_pdb_file + '.npy'
+      # np.save(model_npy_file, prediction_result['plddt'])
 
-      results.append({ 'lddts': prediction_result['plddt'], 'pdb_file': model_pdb_file, 'npy_file': model_npy_file, 'model': model_name })
+      results.append({ 'lddts': prediction_result['plddt'], 'pdb_content': protein.to_pdb(unrelaxed_protein), 'model': model_name })
 
     return results
 

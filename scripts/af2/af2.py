@@ -18,10 +18,8 @@ parser.add_argument('--af-models', metavar='MODEL', nargs='+', default="4", help
 parser.add_argument('--af-nrecycles', type=int, default=3, help='Number of recycling iterations for AlphaFold')
 parser.add_argument('--nstruct', type=int, default=1, help='Number of structures per input sequence, with different random seed')
 parser.add_argument('--scorefile', type=str, default="scores.csv", help='Scorefile name. (default = scores.csv)')
-parser.add_argument("--npy", action="store_true", default=False, help="Should the npz files be dumped?")
 
 args = parser.parse_args()
-# pid = start_nvidia_smi()
 
 
 if args.fasta is not None:
@@ -39,8 +37,9 @@ if args.fasta is not None:
 else:
     sys.exit(1)
 
-with open(args.scorefile, "a") as file:
-    file.write("ID,Name,Sequence,Model/Tag,Output_PDB,lDDT,Time\n")
+if not os.path.exists(args.scorefile):
+    with open(args.scorefile, "a") as file:
+        file.write("ID,Name,Sequence,Model/Tag,Output_PDB,lDDT,Time\n")
 
 
-predictions = AlphaFold2.predict_sequences(sequences, args.af_models, args.af_nrecycles, args.scorefile, nstruct=args.nstruct, npy=args.npy)
+predictions = AlphaFold2.predict_sequences(sequences, args.af_models, args.af_nrecycles, args.scorefile, nstruct=args.nstruct)
